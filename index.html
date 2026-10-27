@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Sonnenflug – Sonnenauf- &amp; -untergang auf der Flugroute</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="theme-color" content="#0b1026">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Sonnenflug">
+</head>
+<body>
+  <div class="sky-bg"></div>
+
+  <main class="container">
+    <header>
+      <h1>✈️ Sonnenflug</h1>
+      <p class="subtitle">Wann geht die Sonne auf oder unter, während du fliegst?
+        Lege beliebig viele Wegpunkte mit je einer UTC-Zeit fest – zwischen ihnen wird
+        entlang des Großkreises interpoliert und der Sonnenstand berechnet.</p>
+    </header>
+
+    <section class="card">
+      <h2>Flugroute &amp; Zeiten</h2>
+      <p class="hint">
+        <strong>Wegpunkte:</strong> Name (z. B. <em>BASNO</em>, <em>EDDF</em>, <em>FRA</em> – Autocomplete hilft)
+        oder Koordinaten – das Format wird automatisch erkannt:<br>
+        Dezimalgrad <em>52.3717, 4.5467</em> · Grad/Minuten <em>N 52° 22.3' E 4° 32.8'</em> ·
+        Grad/Minuten/Sekunden <em>52°22'18"N, 4°32'48"E</em> ·
+        Ganze-Grad-Marker <em>3030N</em> (= 30°N 30°W, Buchstabe = Quadrant N/E/S/W,
+        in der Datenbank vorhanden gewinnt der Datenbankeintrag) ·
+        ICAO/NOTAM <em>5130N00830E</em> · Ost/West oder +/−.
+        Die Uhrzeit ist jeweils die <strong>UTC-Zeit</strong> des Überflugs –
+        das Datum gilt einmalig für den ganzen Flug (max. 24 h).
+        Die Eingabereihenfolge ist egal, Wegpunkte werden automatisch nach Zeit sortiert.
+      </p>
+      <form id="flightForm" autocomplete="off">
+        <div class="dep-row">
+          <label class="base-alt-label">Abflugdatum (UTC)
+            <input type="date" id="depDate">
+          </label>
+          <label class="base-alt-label" title="Flughöhe beim Abflug – gilt bis zum ersten Flughöhenwechsel">
+            Flughöhe beim Abflug (1. Wegpunkt)
+            <input type="text" id="baseAlt" value="FL380" placeholder="FL380">
+          </label>
+        </div>
+        <div id="waypointList"></div>
+        <div class="actions">
+          <button type="button" class="btn" id="addWaypoint">＋ Wegpunkt</button>
+        </div>
+        <div class="alt-changes">
+          <h3>Flughöhenwechsel unterwegs <span class="muted">(optional)</span></h3>
+          <p class="hint">
+            Neue Flughöhe und UTC-Uhrzeit, zu der der Wechsel <strong>beginnt</strong>.
+            Steigen/Sinken erfolgt mit 1000 ft pro Minute – der Horizont wird während des
+            Wechsels mit der Höhe interpoliert (kein Sprung).
+          </p>
+          <div id="altChangeList"></div>
+          <button type="button" class="btn small" id="addAltChange">＋ Flughöhenwechsel</button>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn primary">Sonne berechnen ☀️</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="results" class="hidden">
+      <div class="card">
+        <h2>Ergebnis</h2>
+        <div id="summary"></div>
+        <div id="events"></div>
+      </div>
+      <div class="card">
+        <h2>Sonnenstand während des Fluges</h2>
+        <div class="chart-wrap">
+          <canvas id="chart" width="900" height="320"></canvas>
+        </div>
+        <p class="chart-legend">
+          <span class="sw day"></span> Sonne über dem Horizont &nbsp;&nbsp;
+          <span class="sw night"></span> Nacht &nbsp;&nbsp;
+          <span class="sw curve"></span> Sonnenhöhe &nbsp;&nbsp;
+          <span class="sw horizon"></span> <span id="horizonLegend">Horizont</span> &nbsp;&nbsp;
+          <span class="sw wp"></span> Wegpunkt
+        </p>
+      </div>
+      <div class="card">
+        <h2>Flugroute</h2>
+        <div class="chart-wrap">
+          <canvas id="mapCanvas" width="900" height="400"></canvas>
+        </div>
+        <p class="chart-legend">
+          <span class="sw curve"></span> Flugroute (Großkreis) &nbsp;&nbsp;
+          <span class="sw wp"></span> Wegpunkt &nbsp;&nbsp;
+          <span class="sw sunrise"></span> Sonnenaufgang &nbsp;&nbsp;
+          <span class="sw sunset"></span> Sonnenuntergang
+        </p>
+      </div>
+      <div class="card">
+        <h2>Route &amp; Abschnitte</h2>
+        <div id="routeInfo"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Alle Berechnungen laufen lokal im Browser. Sonnenstand nach NOAA, Interpolation auf dem Großkreis.<br>
+      Wegpunkt-Datenbank: X-Plane navdata (Fixes/Navaids, GPL v3) &amp; OurAirports (Public Domain) –
+      siehe <code>tools/build-waypoints.ps1</code>.<br>
+      Weltkarte: Natural Earth 110m (Public Domain) – siehe <code>tools/build-coastlines.ps1</code>.</p>
+  </footer>
+
+  <script src="waypoints.js"></script>
+  <script src="coastlines.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
