@@ -1,0 +1,420 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg: #0b1026;
+  --card: rgba(255, 255, 255, 0.06);
+  --card-border: rgba(255, 255, 255, 0.12);
+  --text: #eef2ff;
+  --muted: #9aa4c7;
+  --accent: #ffb347;
+  --accent2: #5b8cff;
+  --sunrise: #ff9e5e;
+  --sunset: #b06cff;
+  --error: #ff5f6d;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+.sky-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 110%, rgba(255, 140, 60, 0.25), transparent 60%),
+    radial-gradient(ellipse 70% 40% at 85% 0%, rgba(91, 140, 255, 0.18), transparent 60%),
+    linear-gradient(180deg, #070b1c 0%, #0b1026 45%, #14183a 100%);
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+h1 {
+  font-size: 2.2rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 1.15rem;
+  margin-bottom: 1rem;
+  color: var(--accent);
+}
+
+h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent2);
+}
+
+.subtitle {
+  color: var(--muted);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  backdrop-filter: blur(8px);
+}
+
+.hint {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 1.1rem;
+}
+
+.hint em { color: #c8d0f0; font-style: normal; }
+
+input, button {
+  font-family: inherit;
+}
+
+input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--card-border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+input:focus {
+  outline: 2px solid var(--accent2);
+  outline-offset: 1px;
+}
+
+/* ---------- Wegpunkt-Zeilen ---------- */
+.wp-row {
+  display: grid;
+  grid-template-columns: 2.2rem minmax(0, 1fr) 13rem 2.2rem;
+  gap: 0.6rem;
+  align-items: start;
+  margin-bottom: 0.55rem;
+  position: relative;
+}
+
+.wp-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.45rem;
+  border-radius: 50%;
+  background: rgba(91, 140, 255, 0.18);
+  border: 1px solid rgba(91, 140, 255, 0.4);
+  color: var(--accent2);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.wp-cell {
+  position: relative;
+  min-width: 0;
+}
+
+.wp-cell .wp-input { height: 2.45rem; }
+
+.wp-time { height: 2.45rem; }
+
+/* ---------- Abflug-Datum & -Flughöhe ---------- */
+.dep-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.base-alt-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.88rem;
+  color: var(--muted);
+  min-width: 11rem;
+}
+
+/* ---------- Flughöhenwechsel ---------- */
+.alt-changes {
+  margin-top: 1.4rem;
+  padding-top: 1.1rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.alt-changes h3 .muted { font-weight: 400; }
+
+.ac-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 13rem 2.2rem;
+  gap: 0.6rem;
+  margin-bottom: 0.55rem;
+}
+
+.ac-row input { height: 2.45rem; }
+
+.wp-remove {
+  height: 2.45rem;
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.wp-remove:hover {
+  background: rgba(255, 95, 109, 0.25);
+  color: #fff;
+}
+
+.wp-status {
+  grid-column: 2 / 5;
+  font-size: 0.8rem;
+  color: #8fd6a0;
+  min-height: 1rem;
+  margin-top: -0.2rem;
+}
+
+.wp-status.error {
+  color: #ffb3ba;
+}
+
+/* ---------- Autocomplete ---------- */
+.autocomplete {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #141a38;
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  z-index: 50;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.autocomplete button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 0.45rem 0.7rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.autocomplete button:hover {
+  background: rgba(91, 140, 255, 0.25);
+}
+
+/* ---------- Mehrfachtreffer-Auswahl ---------- */
+.chooser {
+  grid-column: 1 / -1;
+  background: rgba(255, 179, 71, 0.08);
+  border: 1px solid rgba(255, 179, 71, 0.35);
+  border-radius: 10px;
+  padding: 0.6rem;
+  margin-top: 0.3rem;
+}
+
+.chooser-title {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+
+.chooser button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--card-border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  margin-bottom: 0.3rem;
+}
+
+.chooser button:hover {
+  background: rgba(91, 140, 255, 0.3);
+}
+
+/* ---------- Buttons ---------- */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.9rem 0;
+}
+
+.btn {
+  border: 1px solid var(--card-border);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 0.65rem 1.2rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.btn:hover { background: rgba(255, 255, 255, 0.15); }
+.btn:active { transform: scale(0.98); }
+
+.btn.primary {
+  background: linear-gradient(135deg, var(--accent), #ff8c3c);
+  color: #241303;
+  font-weight: 600;
+  border: none;
+  font-size: 1.05rem;
+}
+
+.btn.primary:hover { filter: brightness(1.1); }
+
+/* ---------- Ergebnisse ---------- */
+#summary { font-size: 1.02rem; margin-bottom: 1rem; }
+#summary .big { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.3rem; }
+
+.event {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 0.6rem;
+}
+
+.event .icon { font-size: 1.6rem; }
+.event.up { border-left: 4px solid var(--sunrise); }
+.event.down { border-left: 4px solid var(--sunset); }
+.event .when { font-size: 1.05rem; font-weight: 600; }
+.event .where { color: var(--muted); font-size: 0.85rem; }
+
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.stats-table th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.stats-table td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stats-table .mono { font-family: Consolas, monospace; color: var(--accent); }
+
+/* ---------- Chart ---------- */
+.chart-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+canvas { max-width: 100%; height: auto; }
+
+.chart-legend {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.sw {
+  display: inline-block;
+  width: 18px;
+  height: 10px;
+  border-radius: 3px;
+  vertical-align: middle;
+}
+
+.sw.day { background: rgba(255, 200, 90, 0.35); }
+.sw.night { background: rgba(40, 45, 90, 0.6); }
+.sw.curve { background: var(--accent); height: 3px; }
+.sw.horizon { background: var(--error); height: 2px; }
+.sw.wp { background: var(--accent2); height: 3px; }
+.sw.sunrise { background: var(--sunrise); }
+.sw.sunset { background: var(--sunset); }
+
+/* ---------- Fehlerbox ---------- */
+.error {
+  background: rgba(255, 95, 109, 0.15);
+  border: 1px solid rgba(255, 95, 109, 0.4);
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+  color: #ffb3ba;
+}
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  padding: 1rem;
+}
+
+footer code {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1rem 0.35rem;
+  border-radius: 5px;
+}
+
+.hidden { display: none; }
+
+.btn.small {
+  font-size: 0.8rem;
+  padding: 0.45rem 0.8rem;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 700px) {
+  .wp-row {
+    grid-template-columns: 2rem minmax(0, 1fr) 2rem;
+  }
+  .wp-time { grid-column: 1 / -1; }
+  .wp-status { grid-column: 1 / -1; }
+  .ac-row {
+    grid-template-columns: minmax(0, 1fr) 2.2rem;
+  }
+  .ac-time { grid-column: 1 / -1; }
+  h1 { font-size: 1.7rem; }
+}
